@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOUND</title>
+    <!-- Fuente Cinzel de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #030712;
+            color: #f3f4f6;
+            font-family: 'Cinzel', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        /* Fondo de líneas diagonales oscuras subiendo */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 40px,
+                rgba(255, 255, 255, 0.015) 40px,
+                rgba(255, 255, 255, 0.015) 80px
+            );
+            z-index: -1;
+            pointer-events: none;
+            animation: moveLines 20s linear infinite;
+        }
+
+        @keyframes moveLines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 200px; }
+        }
+
+        h1 {
+            font-size: 3rem;
+            letter-spacing: 6px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+            text-align: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(25, 1fr);
+            gap: 6px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .btn-matrix {
+            background-color: #0b0f19;
+            border: 1px solid #1f2937;
+            color: #9ca3af;
+            aspect-ratio: 1;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+        }
+
+        /* Efecto de luz roja elegante al pasar el mouse */
+        .btn-matrix:hover {
+            background-color: #1a0505;
+            border-color: #dc2626;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.8), inset 0 0 6px rgba(239, 68, 68, 0.5);
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        /* Estilo para el Modal/Mensaje elegante */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #0b0f19;
+            border: 2px solid #dc2626;
+            padding: 40px;
+            max-width: 600px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
+        }
+
+        .modal-content h2 {
+            color: #ef4444;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+        }
+
+        .modal-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #e5e7eb;
+        }
+
+        .modal-content button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .modal-content button:hover {
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>FOUND</h1>
+    <div class="grid-container" id="grid"></div>
+
+    <!-- Modal para mostrar el mensaje secreto -->
+    <div id="modal">
+        <div class="modal-content">
+            <h2>ACCESO CONCEDIDO</h2>
+            <p id="mensaje-texto"></p>
+            <button onclick="cerrarModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const modal = document.getElementById('modal');
+        const mensajeTexto = document.getElementById('mensaje-texto');
+
+        // Generar los 500 botones dinámicamente
+        for (let i = 1; i <= 500; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'btn-matrix';
+            btn.textContent = i;
+            
+            // Al hacer clic, consultamos al servidor backend de manera segura
+            btn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/verificar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ botonId: i })
+                    });
+                    const data = await response.json();
+                    
+                    if (data.exito) {
+                        mensajeTexto.textContent = data.mensaje;
+                        modal.style.display = 'flex';
+                    }
+                } catch (error) {
+                    console.error("Error al verificar con el servidor", error);
+                }
+            });
+
+            grid.appendChild(btn);
+        }
+
+        function cerrarModal() {
+            modal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
